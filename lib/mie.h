@@ -35,3 +35,12 @@ public:
 
     __host__ std::vector<double> bakePhase(const std::vector<double>& cosTheta, double lambda) const;
 };
+
+static double integratePhase(const std::vector<double>& cosTheta, const std::vector<double>& p) {
+    double integral = 0.0;
+    for (size_t n = 0; n < p.size(); n++) {
+        integral += p[n] * sqrt(1.0 - cosTheta[n] * cosTheta[n]);
+    }
+
+    return 2.0 * M_PI * M_PI * integral / static_cast<double>(p.size());
+}

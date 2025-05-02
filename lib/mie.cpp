@@ -10,7 +10,7 @@ void particle::computeXY(double lambda, complexDouble& x, complexDouble& y) cons
 
 __host__ __device__
 int particle::computeM(complexDouble x) const {
-    return static_cast<int>(std::ceil(abs(x) + 4.3 * std::cbrt(abs(x)) + 1.0));
+    return static_cast<int>(std::ceil(abs(x) + 4.3 * std::cbrt(abs(x)) + 4.0));
 }
 
 __host__ __device__
@@ -91,14 +91,12 @@ double particle::phase(double cosTheta, double lambda) const {
 
     auto* Ax = new complexDouble[M + 1];
     auto* Ay = new complexDouble[M + 1];
-    auto* Bx = new complexDouble[M + 1];
 
     computeA(M, x, Ax);
     computeA(M, y, Ay);
 
     double p = phase(cosTheta, x, M, Ax, Ay);
 
-    delete[] Bx;
     delete[] Ay;
     delete[] Ax;
 
