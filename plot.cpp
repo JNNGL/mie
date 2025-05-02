@@ -17,9 +17,13 @@ int main() {
     fig->backend()->run_command("unset warnings");
 
     auto plot1 = fig->current_axes();
+    plot1->xlim({-200, 200});
+    plot1->xticks(iota(-180, 45, 180));
+    plot1->xlabel("Scattering Angle");
 
-    std::vector<double> theta = linspace(-M_PI, M_PI, 32000);
-    std::vector<double> cosTheta = transform(theta, [](double t) { return std::cos(t); });
+    constexpr int nValues = 32000;
+    std::vector<double> theta = linspace(-180, 180, nValues);
+    std::vector<double> cosTheta = transform(theta, [](double t) { return std::cos(t * M_PI / 180.0); });
     std::vector<double> rho = p.bakePhase(cosTheta, lambda);
 
     plot1->hold(on);
