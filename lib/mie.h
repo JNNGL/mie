@@ -1,8 +1,9 @@
 #pragma once
 
-#include <complex>
+#include <lib/gpu.h>
+#include <lib/complex.h>
 
-using complexDouble = std::complex<double>;
+#include <vector>
 
 struct cross_sections {
     double extinction;
@@ -21,12 +22,16 @@ struct particle {
     float radius;
 
 private:
-    void computeXY(double lambda, complexDouble& x, complexDouble& y) const;
-    int computeM(complexDouble x) const;
+    __host__ __device__ void computeXY(double lambda, complexDouble& x, complexDouble& y) const;
+    __host__ __device__ int computeM(complexDouble x) const;
 
-    wave_scattering S(double cosTheta, double lambda) const;
+    __host__ __device__ wave_scattering S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) const;
 
 public:
-    double phase(double cosTheta, double lambda) const;
-    cross_sections crossSections(double lambda) const;
+    __host__ __device__ double phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) const;
+    __host__ __device__ double phase(double cosTheta, double lambda) const;
+
+    __host__ __device__ cross_sections crossSections(double lambda) const;
+
+    __host__ std::vector<double> bakePhase(const std::vector<double>& cosTheta, double lambda) const;
 };

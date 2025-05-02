@@ -1,0 +1,3 @@
+[submodule "thirdparty/matplot"]
+	path = thirdparty/matplot
+	url = https://github.com/alandefreitas/matplotplusplus/
