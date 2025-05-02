@@ -33,16 +33,6 @@ static void computeB(int M, complexDouble z, complexDouble* A, complexDouble* B)
 }
 
 __host__ __device__
-static void computeLegendre(int M, double x, double* P) {
-    P[0] = 1.0;
-    P[1] = x;
-
-    for (int n = 2; n <= M + 1; n++) {
-        P[n] = ((2.0 * n - 1.0) * x * P[n - 1] - (n - 1.0) * P[n - 2]) / static_cast<double>(n);
-    }
-}
-
-__host__ __device__
 double pi_n(double d1dx1) {
     return d1dx1;
 }
@@ -60,20 +50,13 @@ wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDoub
     w.S2 = complexDouble(0.0, 0.0);
     w.a2b2 = 0.0;
 
-    auto* P = new double[M + 2];
-    computeLegendre(M, cosTheta, P);
+    double Pn1 = 1.0;
+    double Pn = cosTheta;
+    double Pd1dx1 = 1.0;
+    double Pd2dx2 = 0.0;
 
     complexDouble psiOverZeta = complexDouble(0.5, 0.0) * (complexDouble(1.0, 0.0) - exp(complexDouble(0.0, -2.0) * x));
     for (int n = 1; n <= M; n++) {
-        double Pd1dx1 = 1.0;
-        double Pd2dx2 = 0.0;
-
-        if (n >= 2) {
-            double u = cosTheta;
-            Pd1dx1 = -(n + 1.0) * (u * P[n] - P[n + 1]) / (u * u - 1.0);
-            Pd2dx2 = (n + 1.0) * ((n * (u * u - 1.0) + 2.0 * u * u) * P[n] - 2.0 * u * P[n + 1]) / pow(u * u - 1.0, 2.0);
-        }
-
         psiOverZeta *= (Bx[n] + complexDouble(n, 0.0) / x) / (Ax[n] + complexDouble(n, 0.0) / x);
 
         complexDouble a = psiOverZeta * (etaMedium * Ay[n] - eta * Ax[n]) / (etaMedium * Ay[n] - eta * Bx[n]);
@@ -86,9 +69,15 @@ wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDoub
         w.S2 += complexDouble((2.0 * n + 1.0) / (n * (n + 1.0)), 0.0) * (b * pi + a * tau);
 
         w.a2b2 += (2.0 * n + 1.0) * (norm(a) + norm(b));
-    }
 
-    delete[] P;
+        Pd2dx2 = cosTheta * Pd2dx2 + (n + 2.0) * Pd1dx1;
+        Pd1dx1 = (n + 1.0) * Pn + cosTheta * Pd1dx1;
+
+        double Pn2 = Pn1;
+        Pn1 = Pn;
+
+        Pn = ((2.0 * n + 1.0) * cosTheta * Pn1 - n * Pn2) / (n + 1.0);
+    }
 
     return w;
 }
@@ -158,9 +147,6 @@ void bakePhaseKernel(size_t N, particle p, double* data, complexDouble x, int M,
     }
 
     data[index] = p.phase(data[index], x, M, Ax, Ay, Bx);
-    if (isnan(data[index])) {
-        data[index] = 0.0;
-    }
 }
 
 __host__
@@ -168,8 +154,6 @@ std::vector<double> particle::bakePhase(const std::vector<double>& cosTheta, dou
     double* data;
     cudaMallocManaged(&data, cosTheta.size() * sizeof(double));
     memcpy(data, cosTheta.data(), cosTheta.size() * sizeof(double));
-
-    checkErrors(cudaDeviceSetLimit(cudaLimitMallocHeapSize, 1024 * 1024 * 1024));
 
     complexDouble x, y;
     computeXY(lambda, x, y);
