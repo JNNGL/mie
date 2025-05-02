@@ -25,10 +25,10 @@ private:
     __host__ __device__ void computeXY(double lambda, complexDouble& x, complexDouble& y) const;
     __host__ __device__ int computeM(complexDouble x) const;
 
-    __host__ __device__ wave_scattering S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) const;
+    __host__ __device__ wave_scattering S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const;
 
 public:
-    __host__ __device__ double phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) const;
+    __host__ __device__ double phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const;
     __host__ __device__ double phase(double cosTheta, double lambda) const;
 
     __host__ __device__ cross_sections crossSections(double lambda) const;

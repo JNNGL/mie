@@ -22,17 +22,6 @@ static void computeA(int M, complexDouble z, complexDouble* A) {
 }
 
 __host__ __device__
-static void computeB(int M, complexDouble z, complexDouble* A, complexDouble* B) {
-    complexDouble psiZeta = complexDouble(0.5, 0.0) * (complexDouble(1.0, 0.0) - exp(complexDouble(0.0, 2.0) * z));
-    B[0] = complexDouble(0.0, 1.0);
-
-    for (int n = 1; n <= M; n++) {
-        psiZeta *= (complexDouble(n, 0.0) / z - A[n - 1]) * (complexDouble(n, 0.0) / z - B[n - 1]);
-        B[n] = A[n] + complexDouble(0.0, 1.0) / psiZeta;
-    }
-}
-
-__host__ __device__
 double pi_n(double d1dx1) {
     return d1dx1;
 }
@@ -44,7 +33,7 @@ double tau_n(double cosTheta, double d1dx1, double d2dx2) {
 }
 
 __host__ __device__
-wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) const {
+wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const {
     wave_scattering w;
     w.S1 = complexDouble(0.0, 0.0);
     w.S2 = complexDouble(0.0, 0.0);
@@ -54,13 +43,18 @@ wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDoub
     double Pn = cosTheta;
     double Pd1dx1 = 1.0;
     double Pd2dx2 = 0.0;
+    complexDouble Bn(0.0, 1.0);
 
+    complexDouble psiZeta = complexDouble(0.5, 0.0) * (complexDouble(1.0, 0.0) - exp(complexDouble(0.0, 2.0) * x));
     complexDouble psiOverZeta = complexDouble(0.5, 0.0) * (complexDouble(1.0, 0.0) - exp(complexDouble(0.0, -2.0) * x));
     for (int n = 1; n <= M; n++) {
-        psiOverZeta *= (Bx[n] + complexDouble(n, 0.0) / x) / (Ax[n] + complexDouble(n, 0.0) / x);
+        psiZeta *= (complexDouble(n, 0.0) / x - Ax[n - 1]) * (complexDouble(n, 0.0) / x - Bn);
+        Bn = Ax[n] + complexDouble(0.0, 1.0) / psiZeta;
 
-        complexDouble a = psiOverZeta * (etaMedium * Ay[n] - eta * Ax[n]) / (etaMedium * Ay[n] - eta * Bx[n]);
-        complexDouble b = psiOverZeta * (eta * Ay[n] - etaMedium * Ax[n]) / (eta * Ay[n] - etaMedium * Bx[n]);
+        psiOverZeta *= (Bn + complexDouble(n, 0.0) / x) / (Ax[n] + complexDouble(n, 0.0) / x);
+
+        complexDouble a = psiOverZeta * (etaMedium * Ay[n] - eta * Ax[n]) / (etaMedium * Ay[n] - eta * Bn);
+        complexDouble b = psiOverZeta * (eta * Ay[n] - etaMedium * Ax[n]) / (eta * Ay[n] - etaMedium * Bn);
 
         complexDouble pi = complexDouble(pi_n(Pd1dx1), 0.0);
         complexDouble tau = complexDouble(tau_n(cosTheta, Pd1dx1, Pd2dx2), 0.0);
@@ -83,8 +77,8 @@ wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDoub
 }
 
 __host__ __device__
-double particle::phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) const {
-    wave_scattering w = S(cosTheta, x, M, Ax, Ay, Bx);
+double particle::phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const {
+    wave_scattering w = S(cosTheta, x, M, Ax, Ay);
     return (norm(w.S1) + norm(w.S2)) / (4.0 * M_PI * w.a2b2);
 }
 
@@ -101,9 +95,8 @@ double particle::phase(double cosTheta, double lambda) const {
 
     computeA(M, x, Ax);
     computeA(M, y, Ay);
-    computeB(M, x, Ax, Bx);
 
-    double p = phase(cosTheta, x, M, Ax, Ay, Bx);
+    double p = phase(cosTheta, x, M, Ax, Ay);
 
     delete[] Bx;
     delete[] Ay;
@@ -140,13 +133,13 @@ void cudaCheckErrors(cudaError_t result, char const *const func, const char *con
 #define checkErrors(val) cudaCheckErrors((val), #val, __FILE__, __LINE__)
 
 __global__
-void bakePhaseKernel(size_t N, particle p, double* data, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay, complexDouble* Bx) {
+void bakePhaseKernel(size_t N, particle p, double* data, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) {
     uint index = blockIdx.x * blockDim.x + threadIdx.x;
     if (index >= N) {
         return;
     }
 
-    data[index] = p.phase(data[index], x, M, Ax, Ay, Bx);
+    data[index] = p.phase(data[index], x, M, Ax, Ay);
 }
 
 __host__
@@ -160,18 +153,16 @@ std::vector<double> particle::bakePhase(const std::vector<double>& cosTheta, dou
 
     int M = computeM(x);
 
-    complexDouble* Ax, *Ay, *Bx;
+    complexDouble* Ax, *Ay;
     cudaMallocManaged(&Ax, (M + 1) * sizeof(complexDouble));
     cudaMallocManaged(&Ay, (M + 1) * sizeof(complexDouble));
-    cudaMallocManaged(&Bx, (M + 1) * sizeof(complexDouble));
 
     computeA(M, x, Ax);
     computeA(M, y, Ay);
-    computeB(M, x, Ax, Bx);
 
     constexpr int groupSize = 32;
     const int groups = static_cast<int>(cosTheta.size() + groupSize - 1) / groupSize;
-    bakePhaseKernel<<<groups, groupSize>>>(cosTheta.size(), *this, data, x, M, Ax, Ay, Bx);
+    bakePhaseKernel<<<groups, groupSize>>>(cosTheta.size(), *this, data, x, M, Ax, Ay);
 
     checkErrors(cudaGetLastError());
     checkErrors(cudaDeviceSynchronize());
@@ -180,7 +171,6 @@ std::vector<double> particle::bakePhase(const std::vector<double>& cosTheta, dou
     memcpy(p.data(), data, p.size() * sizeof(double));
 
     cudaFree(data);
-    cudaFree(Bx);
     cudaFree(Ay);
     cudaFree(Ax);
 
