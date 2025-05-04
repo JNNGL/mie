@@ -17,9 +17,7 @@ template <>
 std::string to_string(complexDouble c) {
     std::ostringstream oss;
     oss << c.real();
-    if (c.imag() != 0.0) {
-        oss << " + i" << c.imag();
-    }
+    oss << " + " << c.imag() << "i";
     return oss.str();
 }
 
@@ -32,12 +30,12 @@ void multilineLegend(const std::shared_ptr<axes_type>& plot, const std::vector<s
 }
 
 int main() {
+    double lambda = 0.5 * 1.0e-6;
+
     particle p{};
-    p.radius = 25.0 * 1.0e-6;
+    p.radius = 10.0 * 1.0e-6;
     p.etaMedium = complexDouble(1.00029, 0.0);
     p.eta = complexDouble(1.334, 0.0);
-
-    double lambda = 0.65 * 1.0e-6;
 
     auto fig = figure<backend::gnuplot>(true);
     fig->backend()->run_command("unset warnings");

@@ -10,14 +10,17 @@ void particle::computeXY(double lambda, complexDouble& x, complexDouble& y) cons
 
 __host__ __device__
 int particle::computeM(complexDouble x) const {
-    return static_cast<int>(std::ceil(abs(x) + 4.3 * std::cbrt(abs(x)) + 4.0));
+    return static_cast<int>(std::ceil(abs(x) + 4.3 * std::cbrt(abs(x)) + 1.0));
 }
 
 __host__ __device__
 static void computeA(int M, complexDouble z, complexDouble* A) {
-    A[M] = complexDouble(0.0, 0.0);
-    for (int n = M - 1; n >= 0; n--) {
-        A[n] = complexDouble(n + 1.0, 0.0) / z - complexDouble(1.0, 0.0) / (complexDouble(n + 1.0, 0.0) / z + A[n + 1]);
+    complexDouble An(0.0, 0.0);
+    for (int n = 2 * M; n >= 0; n--) {
+        An = complexDouble(n + 1.0, 0.0) / z - complexDouble(1.0, 0.0) / (complexDouble(n + 1.0, 0.0) / z + An);
+        if (n <= M) {
+            A[n] = An;
+        }
     }
 }
 
