@@ -25,27 +25,14 @@ static void computeA(int M, complexDouble z, complexDouble* A) {
 }
 
 __host__ __device__
-double pi_n(double d1dx1) {
-    return d1dx1;
-}
-
-__host__ __device__
-double tau_n(double cosTheta, double d1dx1, double d2dx2) {
-    double sin2Theta = 1.0 - cosTheta * cosTheta;
-    return cosTheta * d1dx1 - sin2Theta * d2dx2;
-}
-
-__host__ __device__
-wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const {
-    wave_scattering w;
+scattering_amplitudes particle::S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const {
+    scattering_amplitudes w;
     w.S1 = complexDouble(0.0, 0.0);
     w.S2 = complexDouble(0.0, 0.0);
     w.a2b2 = 0.0;
 
-    double Pn1 = 1.0;
-    double Pn = cosTheta;
-    double Pd1dx1 = 1.0;
-    double Pd2dx2 = 0.0;
+    double pi = 1.0;
+    double pi1 = 0.0;
     complexDouble Bn(0.0, 1.0);
 
     complexDouble psiZeta = complexDouble(0.5, 0.0) * (complexDouble(1.0, 0.0) - exp(complexDouble(0.0, 2.0) * x));
@@ -59,21 +46,14 @@ wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDoub
         complexDouble a = psiOverZeta * (etaMedium * Ay[n] - eta * Ax[n]) / (etaMedium * Ay[n] - eta * Bn);
         complexDouble b = psiOverZeta * (eta * Ay[n] - etaMedium * Ax[n]) / (eta * Ay[n] - etaMedium * Bn);
 
-        complexDouble pi = complexDouble(pi_n(Pd1dx1), 0.0);
-        complexDouble tau = complexDouble(tau_n(cosTheta, Pd1dx1, Pd2dx2), 0.0);
+        complexDouble tau = complexDouble(n * cosTheta * pi - (n + 1) * pi1, 0.0);
 
-        w.S1 += complexDouble((2.0 * n + 1.0) / (n * (n + 1.0)), 0.0) * (a * pi + b * tau);
-        w.S2 += complexDouble((2.0 * n + 1.0) / (n * (n + 1.0)), 0.0) * (b * pi + a * tau);
+        w.S1 += complexDouble((2.0 * n + 1.0) / (n * (n + 1.0)), 0.0) * (a * complexDouble(pi, 0.0) + b * tau);
+        w.S2 += complexDouble((2.0 * n + 1.0) / (n * (n + 1.0)), 0.0) * (b * complexDouble(pi, 0.0) + a * tau);
 
         w.a2b2 += (2.0 * n + 1.0) * (norm(a) + norm(b));
 
-        Pd2dx2 = cosTheta * Pd2dx2 + (n + 2.0) * Pd1dx1;
-        Pd1dx1 = (n + 1.0) * Pn + cosTheta * Pd1dx1;
-
-        double Pn2 = Pn1;
-        Pn1 = Pn;
-
-        Pn = ((2.0 * n + 1.0) * cosTheta * Pn1 - n * Pn2) / (n + 1.0);
+        pi1 = exchange(pi, (cosTheta * (2.0 * n + 1.0) * pi - (n + 1.0) * pi1) / n);
     }
 
     return w;
@@ -81,7 +61,7 @@ wave_scattering particle::S(double cosTheta, complexDouble x, int M, complexDoub
 
 __host__ __device__
 double particle::phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const {
-    wave_scattering w = S(cosTheta, x, M, Ax, Ay);
+    scattering_amplitudes w = S(cosTheta, x, M, Ax, Ay);
     return (norm(w.S1) + norm(w.S2)) / (4.0 * M_PI * w.a2b2);
 }
 

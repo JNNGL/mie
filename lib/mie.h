@@ -10,7 +10,7 @@ struct cross_sections {
     double scattering;
 };
 
-struct wave_scattering {
+struct scattering_amplitudes {
     complexDouble S1;
     complexDouble S2;
     double a2b2;
@@ -25,7 +25,7 @@ private:
     __host__ __device__ void computeXY(double lambda, complexDouble& x, complexDouble& y) const;
     __host__ __device__ int computeM(complexDouble x) const;
 
-    __host__ __device__ wave_scattering S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const;
+    __host__ __device__ scattering_amplitudes S(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const;
 
 public:
     __host__ __device__ double phase(double cosTheta, complexDouble x, int M, complexDouble* Ax, complexDouble* Ay) const;

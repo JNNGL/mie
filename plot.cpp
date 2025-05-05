@@ -33,7 +33,7 @@ int main() {
     double lambda = 0.5 * 1.0e-6;
 
     particle p{};
-    p.radius = 10.0 * 1.0e-6;
+    p.radius = 5.0 * 1.0e-6;
     p.etaMedium = complexDouble(1.00029, 0.0);
     p.eta = complexDouble(1.334, 0.0);
 
