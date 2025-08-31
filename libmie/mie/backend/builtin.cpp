@@ -1,6 +1,7 @@
 #include <mie/backend/registry.h>
 
 #include <mie/backend/builtin/cpu.h>
+#include <mie/backend/builtin/cuda.h>
 
 #include <utility>
 #include <vector>
@@ -14,6 +15,9 @@ namespace mie {
     extern const std::vector<std::pair<BackendInfo, detail::BackendInstantiator>> g_builtinBackends;
 
     const std::vector<std::pair<BackendInfo, detail::BackendInstantiator>> g_builtinBackends = {
+#ifdef ENABLE_CUDA_BACKEND
+        DECLARE_BACKEND(CUDABackend),
+#endif
         DECLARE_BACKEND(CPUBackend)
     };
 }

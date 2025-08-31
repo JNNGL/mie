@@ -1,0 +1,3 @@
+[submodule "bakemie/third_party/stb"]
+	path = bakemie/third_party/stb
+	url = https://github.com/nothings/stb

@@ -40,7 +40,7 @@ namespace mie {
 
             auto iter = g_builtinBackends.begin();
             while (iter != g_builtinBackends.end()) {
-                g_registry->backends.emplace(std::string(iter->first.id), BackendEntry{iter->first, iter->second});
+                detail::registerBackend(iter->first, iter->second);
                 ++iter;
             }
         }
