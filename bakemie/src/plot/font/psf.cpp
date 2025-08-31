@@ -1,6 +1,6 @@
 #include "psf.h"
 
-#include <exception>
+#include <stdexcept>
 #include <fstream>
 
 PSF1Font::PSF1Font(const std::string& filename) {

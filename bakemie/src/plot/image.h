@@ -37,6 +37,7 @@ public:
     void save(const std::string& filename) const;
 
     void fill(Color color);
+    void fill(Color color, int x1, int y1, int x2, int y2);
     [[nodiscard]] Color getPixel(int x, int y) const;
     void setPixel(int x, int y, Color color);
     void drawPixel(int x, int y, Color color);

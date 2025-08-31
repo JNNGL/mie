@@ -46,6 +46,14 @@ void Image::fill(Color color) {
     }
 }
 
+void Image::fill(Color color, int x1, int y1, int x2, int y2) {
+    for (int x = x1; x <= x2; x++) {
+        for (int y = y1; y <= y2; y++) {
+            data[y * width + x] = color;
+        }
+    }
+}
+
 Color Image::getPixel(int x, int y) const {
     if (x < 0 || y < 0 || x >= width || y >= height) {
         return {};

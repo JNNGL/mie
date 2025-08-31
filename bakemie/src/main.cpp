@@ -2,45 +2,39 @@
 
 #include <mie/solver.h>
 
-#include <plot/image.h>
+#include <plot/graph.h>
 
 int main() {
     auto solver = mie::Solver::create();
-    std::cout << solver->backendInfo().name << std::endl;
 
-    auto font = std::make_shared<PSF1Font>("font.psf");
-    Image image(1280, 720);
-    image.fill({{255, 255, 255, 255}});
-    image.setFont(font);
+    mie::Particle particle{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 10.0e-6};
 
-    image.setTextOptions({.scale = 2});
+    std::vector<double> x(500);
+    std::vector<double> y(x.size());
 
-    mie::Particle particle{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 1000.0e-6};
-
-    std::vector<float> values(10000);
-
-    float minValue = 1.0e20f;
-    float maxValue = -1.0e20f;
-    for (int i = 0; i < values.size(); i++) {
-        double theta = 2.0 * M_PI * static_cast<double>(i) / static_cast<double>(values.size() - 1);
-        double cosTheta = std::cos(theta);
+    for (int i = 0; i < x.size(); i++) {
+        double theta = static_cast<double>(i) / static_cast<double>(x.size() - 1);
+        double cosTheta = std::cos(2.0 * M_PI * theta);
 
         double value = solver->computeScatteringAmplitudes(particle, cosTheta, 500.0e-9).phase();
-        value = std::log10(value);
 
-        values[i] = static_cast<float>(value);
-
-        minValue = std::min(minValue, values[i]);
-        maxValue = std::max(maxValue, values[i]);
+        x[i] = 180.0 * theta;
+        y[i] = value;
     }
 
-    for (int i = 0; i < values.size() - 1; i++) {
-        Point start = {static_cast<float>(i * image.getWidth()) / static_cast<float>(values.size() - 1), static_cast<float>(image.getHeight()) * (values[i] - minValue) / (maxValue - minValue)};
-        Point end = {static_cast<float>((i + 1) * image.getWidth()) / static_cast<float>(values.size() - 1), static_cast<float>(image.getHeight()) * (values[i + 1] - minValue) / (maxValue - minValue)};
-        image.drawLine(start, end, {{255, 0, 0, 255}});
-    }
+    auto font = std::make_shared<PSF1Font>("font.psf");
+    Graph graph(1280, 720, font);
+    graph.title = "Phase Function";
+    graph.footerHeight = 100;
+    graph.logScaleY = true;
+    graph.majorTickStepY = 10.0;
+    graph.minorTickCountY = 7;
+    graph.majorTickStepX = 45.0;
+    graph.minorTickCountX = 5;
 
-    image.save("image.png");
+    graph.render(x, y);
+
+    graph.image.save("image.png");
 
     return 0;
 }
