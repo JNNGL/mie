@@ -6,7 +6,7 @@
 
 class Graph {
 public:
-    Graph(uint32_t width, uint32_t height, const std::shared_ptr<PSF1Font>& font)
+    Graph(uint32_t width, uint32_t height, const std::shared_ptr<Font>& font)
         : image(width, height) {
         image.setFont(font);
     }
@@ -15,6 +15,7 @@ public:
 
     Image image;
     std::optional<std::string> title;
+    std::optional<std::string> labelX;
     int footerHeight = 0;
     double majorTickStepX = 10.0;
     double majorTickStepY = 10.0;

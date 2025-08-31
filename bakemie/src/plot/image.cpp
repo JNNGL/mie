@@ -79,7 +79,11 @@ void Image::drawPixel(int x, int y, Color color) {
     data[y * width + x] = blendColor(data[y * width + x], color);
 }
 
-void Image::setFont(const std::shared_ptr<PSF1Font>& newFont) {
+std::shared_ptr<Font> Image::getFont() const {
+    return font;
+}
+
+void Image::setFont(const std::shared_ptr<Font>& newFont) {
     font = newFont;
 }
 
@@ -100,38 +104,7 @@ void Image::drawText(const std::string& text, int x, int y, float anchorX, float
         return;
     }
 
-    uint32_t textWidth = text.length() * (8 * textOptions.scale + textOptions.spacing) - textOptions.spacing;
-    y -= static_cast<int>(static_cast<float>(textOptions.scale * font->height()) * anchorY);
-    x -= static_cast<int>(static_cast<float>(textWidth) * anchorX);
-
-    if (textOptions.backgroundColor.a != 0) {
-        const auto pad = textOptions.backgroundPadding;
-        for (int drawY = y - pad; drawY < y + pad + font->height() * textOptions.scale; drawY++) {
-            for (int drawX = x - pad; drawX < x + pad + textWidth; drawX++) {
-                drawPixel(drawX, drawY, textOptions.backgroundColor);
-            }
-        }
-    }
-
-    if (textOptions.textColor.a == 0) {
-        return;
-    }
-
-    for (size_t i = 0; i < text.length(); i++) {
-        for (int fontX = 0; fontX < 8; fontX++) {
-            for (int fontY = 0; fontY < font->height(); fontY++) {
-                if (!font->isBitSet(text[i], fontX, static_cast<int>(font->height()) - 1 - fontY)) {
-                    continue;
-                }
-                for (int drawX = fontX * textOptions.scale; drawX < (fontX + 1) * textOptions.scale; drawX++) {
-                    for (int drawY = fontY * textOptions.scale; drawY < (fontY + 1) * textOptions.scale; drawY++) {
-                        drawPixel(x + drawX, y + drawY, textOptions.textColor);
-                    }
-                }
-            }
-        }
-        x += 8 * textOptions.scale + textOptions.spacing;
-    }
+    font->render(*this, text, x, y, anchorX, anchorY, textOptions);
 }
 
 struct PixelPos {

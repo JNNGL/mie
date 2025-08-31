@@ -1,12 +1,17 @@
 #pragma once
 
+#include <plot/font/base.h>
+
 #include <string>
 #include <cstdint>
 
-class PSF1Font {
+class PSF1Font : public Font {
 public:
     explicit PSF1Font(const std::string& filename);
-    ~PSF1Font();
+    ~PSF1Font() override;
+
+    void render(Image& image, const std::string& text, int x, int y, float anchorX, float anchorY, const TextOptions& options) override;
+    int getTextWidth(const std::string& text, const TextOptions& options) override;
 
     [[nodiscard]] bool isBitSet(char c, int x, int y) const;
 

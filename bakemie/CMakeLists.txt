@@ -10,6 +10,7 @@ target_include_directories(bakemie PUBLIC ${PROJECT_SOURCE_DIR}/src)
 target_link_libraries(bakemie PUBLIC libmie)
 
 configure_file(${PROJECT_SOURCE_DIR}/resources/zap-vga09.psf ${PROJECT_BINARY_DIR}/font.psf COPYONLY)
+configure_file(${PROJECT_SOURCE_DIR}/resources/RobotoMono-Regular.ttf ${PROJECT_BINARY_DIR}/font.ttf COPYONLY)
 
 if(EXISTS ${PROJECT_SOURCE_DIR}/third_party/stb AND IS_DIRECTORY ${PROJECT_SOURCE_DIR}/third_party/stb)
     target_include_directories(bakemie PUBLIC ${PROJECT_SOURCE_DIR}/third_party/stb)

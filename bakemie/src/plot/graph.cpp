@@ -46,27 +46,28 @@ void Graph::render(const std::vector<double>& x, const std::vector<double>& y) {
         throw std::runtime_error("invalid arguments");
     }
 
-    int workAreaStartX = 0, workAreaStartY = footerHeight ? footerHeight + 2 : 0;
-    int workAreaEndX = image.getWidth(), workAreaEndY = image.getHeight();
+    int graphAreaStartX = 0, graphAreaStartY = footerHeight ? footerHeight + 2 : 0;
+    int graphAreaEndX = image.getWidth(), graphAreaEndY = image.getHeight();
 
     image.fill({{255, 255, 255, 255}});
-    image.setTextOptions({.scale = 2});
 
     if (title) {
-        workAreaEndY -= 50;
+        graphAreaEndY -= 50;
 
+        image.setTextOptions({.textColor = {{70, 70, 70, 255}}, .scale = 2.0});
         image.drawText(*title, image.getWidth() / 2, image.getHeight() - 25, 0.5f, 0.5f);
     }
 
-    workAreaStartX += 100;
-    workAreaEndX -= 15;
-    workAreaStartY += 50;
+    graphAreaStartX += 15;
+    graphAreaEndX -= 15;
+    graphAreaStartY += 35;
     if (!title) {
-        workAreaEndY -= 15;
+        graphAreaEndY -= 15;
     }
 
-    const Color borderColor = {{0, 0, 0, 80}};
-    image.fill({{250, 250, 250, 255}}, workAreaStartX, workAreaStartY, workAreaEndX, workAreaEndY);
+    if (labelX) {
+        graphAreaStartY += 25;
+    }
 
     double minX = std::min(x.front(), x.back());
     double maxX = std::max(x.front(), x.back());
@@ -86,67 +87,101 @@ void Graph::render(const std::vector<double>& x, const std::vector<double>& y) {
         maxY = std::log10(maxY);
     }
 
-    auto areaSizeX = static_cast<float>(workAreaEndX - workAreaStartX);
-    auto areaSizeY = static_cast<float>(workAreaEndY - workAreaStartY);
+    minY *= 1.1;
+    maxY *= 1.1;
 
-    for (const double& tickX : ticksX[0]) {
-        Point start = {
-            std::round(static_cast<float>((tickX - minX) / (maxX - minX)) * areaSizeX) + 0.5f + static_cast<float>(workAreaStartX),
-            static_cast<float>(workAreaStartY)
-        };
-        Point end = {
-            start.x,
-            static_cast<float>(workAreaEndY)
-        };
+    image.setTextOptions({.textColor = {{0, 0, 0, 200}}, .scale = 1.3});
+    int tickTextWidth = 0;
+    for (const double& tickY : ticksY[0]) {
+        std::stringstream stream;
+        stream << tickY;
 
-        image.drawLine(start, end, {{0, 0, 0, 70}});
+        tickTextWidth = std::max(tickTextWidth, image.getFont()->getTextWidth(stream.str(), image.getTextOptions()));
     }
+
+    graphAreaStartX += tickTextWidth + 5;
+
+    auto areaSizeX = static_cast<float>(graphAreaEndX - graphAreaStartX);
+    auto areaSizeY = static_cast<float>(graphAreaEndY - graphAreaStartY);
+
+    image.fill({{250, 250, 250, 255}}, graphAreaStartX, graphAreaStartY, graphAreaEndX, graphAreaEndY);
+
     for (const double& tickX : ticksX[1]) {
         Point start = {
-            std::round(static_cast<float>((tickX - minX) / (maxX - minX)) * areaSizeX) + 0.5f + static_cast<float>(workAreaStartX),
-            static_cast<float>(workAreaStartY)
+            std::round(static_cast<float>((tickX - minX) / (maxX - minX)) * areaSizeX) + 0.5f + static_cast<float>(graphAreaStartX),
+            static_cast<float>(graphAreaStartY)
         };
         Point end = {
             start.x,
-            static_cast<float>(workAreaEndY)
+            static_cast<float>(graphAreaEndY)
         };
 
         image.drawLine(start, end, {{0, 0, 0, 30}});
+    }
+
+    for (const double& tickY : ticksY[1]) {
+        double posY = logScaleY ? std::log10(tickY) : tickY;
+
+        Point start = {
+            static_cast<float>(graphAreaStartX),
+            std::round(static_cast<float>((posY - minY) / (maxY - minY)) * areaSizeY) + 0.5f + static_cast<float>(graphAreaStartY)
+        };
+        Point end = {
+            static_cast<float>(graphAreaEndX),
+            start.y
+        };
+
+        image.drawLine(start, end, {{0, 0, 0, 30}});
+    }
+
+    for (const double& tickX : ticksX[0]) {
+        Point start = {
+            std::round(static_cast<float>((tickX - minX) / (maxX - minX)) * areaSizeX) + 0.5f + static_cast<float>(graphAreaStartX),
+            static_cast<float>(graphAreaStartY)
+        };
+        Point end = {
+            start.x,
+            static_cast<float>(graphAreaEndY)
+        };
+
+        std::stringstream stream;
+        stream << tickX;
+
+        image.drawLine(start, end, {{0, 0, 0, 70}});
+
+        int textWidth = image.getFont()->getTextWidth(stream.str(), image.getTextOptions());
+
+        float anchorX = 0.5f;
+        int textX = static_cast<int>(start.x);
+        if (textX + textWidth / 2 > graphAreaEndX) {
+            anchorX = 1.0f;
+            textX = graphAreaEndX;
+        }
+        image.drawText(stream.str(), textX, graphAreaStartY - 5, anchorX, 1.0);
     }
 
     for (const double& tickY : ticksY[0]) {
         double posY = logScaleY ? std::log10(tickY) : tickY;
 
         Point start = {
-            static_cast<float>(workAreaStartX) - 5.0f,
-            std::round(static_cast<float>((posY - minY) / (maxY - minY)) * areaSizeY) + 0.5f + static_cast<float>(workAreaStartY)
+            static_cast<float>(graphAreaStartX) - 5.0f,
+            std::round(static_cast<float>((posY - minY) / (maxY - minY)) * areaSizeY) + 0.5f + static_cast<float>(graphAreaStartY)
         };
         Point end = {
-            static_cast<float>(workAreaEndX),
+            static_cast<float>(graphAreaEndX),
             start.y
         };
 
         std::stringstream stream;
         stream << tickY;
 
-        image.setTextOptions({.scale = 2});
-
         image.drawLine(start, end, {{0, 0, 0, 70}});
-        image.drawText(stream.str(), workAreaStartX - 10, static_cast<int>(start.y) - 1, 1.0, 0.5);
+        image.drawText(stream.str(), graphAreaStartX - 10, static_cast<int>(start.y) - 1, 1.0, 0.5);
     }
-    for (const double& tickY : ticksY[1]) {
-        double posY = logScaleY ? std::log10(tickY) : tickY;
 
-        Point start = {
-            static_cast<float>(workAreaStartX),
-            std::round(static_cast<float>((posY - minY) / (maxY - minY)) * areaSizeY) + 0.5f + static_cast<float>(workAreaStartY)
-        };
-        Point end = {
-            static_cast<float>(workAreaEndX),
-            start.y
-        };
-
-        image.drawLine(start, end, {{0, 0, 0, 30}});
+    if (labelX) {
+        image.setTextOptions({.textColor = {{70, 70, 70, 255}}, .scale = 1.4});
+        image.drawText(*labelX, (graphAreaStartX + graphAreaEndX) / 2, 25, 0.5f, 0.5f);
     }
 
     for (size_t i = 0; i < x.size() - 1; i++) {
@@ -154,24 +189,25 @@ void Graph::render(const std::vector<double>& x, const std::vector<double>& y) {
         double y1 = logScaleY ? std::log10(y[i + 1]) : y[i + 1];
 
         Point start = {
-            static_cast<float>((x[i] - minX) / (maxX - minX)) * areaSizeX + static_cast<float>(workAreaStartX),
-            static_cast<float>((y0 - minY) / (maxY - minY)) * areaSizeY + static_cast<float>(workAreaStartY)
+            static_cast<float>((x[i] - minX) / (maxX - minX)) * areaSizeX + static_cast<float>(graphAreaStartX),
+            static_cast<float>((y0 - minY) / (maxY - minY)) * areaSizeY + static_cast<float>(graphAreaStartY)
         };
         Point end = {
-            static_cast<float>((x[i + 1] - minX) / (maxX - minX)) * areaSizeX + static_cast<float>(workAreaStartX),
-            static_cast<float>((y1 - minY) / (maxY - minY)) * areaSizeY + static_cast<float>(workAreaStartY)
+            static_cast<float>((x[i + 1] - minX) / (maxX - minX)) * areaSizeX + static_cast<float>(graphAreaStartX),
+            static_cast<float>((y1 - minY) / (maxY - minY)) * areaSizeY + static_cast<float>(graphAreaStartY)
         };
         image.drawLine(start, end, {{255, 0, 0, 255}});
     }
 
-    image.drawLine({static_cast<float>(workAreaStartX) + 0.5f, static_cast<float>(workAreaStartY) + 0.5f},
-                   {static_cast<float>(workAreaStartX) + 0.5f, static_cast<float>(workAreaEndY) + 0.5f}, borderColor);
-    // image.drawLine({static_cast<float>(workAreaEndX) + 0.5f, static_cast<float>(workAreaStartY) + 0.5f},
-    //                {static_cast<float>(workAreaEndX) + 0.5f, static_cast<float>(workAreaEndY) + 0.5f}, borderColor);
-    image.drawLine({static_cast<float>(workAreaStartX) + 0.5f, static_cast<float>(workAreaStartY) + 0.5f},
-                   {static_cast<float>(workAreaEndX) + 0.5f, static_cast<float>(workAreaStartY) + 0.5f}, borderColor);
-    // image.drawLine({static_cast<float>(workAreaStartX) + 0.5f, static_cast<float>(workAreaEndY) + 0.5f},
-    //                {static_cast<float>(workAreaEndX) + 0.5f, static_cast<float>(workAreaEndY) + 0.5f}, borderColor);
+    const Color borderColor = {{0, 0, 0, 80}};
+    image.drawLine({static_cast<float>(graphAreaStartX) + 0.5f, static_cast<float>(graphAreaStartY) + 0.5f},
+                   {static_cast<float>(graphAreaStartX) + 0.5f, static_cast<float>(graphAreaEndY) + 0.5f}, borderColor);
+    image.drawLine({static_cast<float>(graphAreaEndX) + 0.5f, static_cast<float>(graphAreaStartY) + 0.5f},
+                   {static_cast<float>(graphAreaEndX) + 0.5f, static_cast<float>(graphAreaEndY) + 0.5f}, borderColor);
+    image.drawLine({static_cast<float>(graphAreaStartX) + 0.5f, static_cast<float>(graphAreaStartY) + 0.5f},
+                   {static_cast<float>(graphAreaEndX) + 0.5f, static_cast<float>(graphAreaStartY) + 0.5f}, borderColor);
+    image.drawLine({static_cast<float>(graphAreaStartX) + 0.5f, static_cast<float>(graphAreaEndY) + 0.5f},
+                   {static_cast<float>(graphAreaEndX) + 0.5f, static_cast<float>(graphAreaEndY) + 0.5f}, borderColor);
 
     if (footerHeight != 0) {
         auto separatorY = static_cast<float>(footerHeight + 1);
