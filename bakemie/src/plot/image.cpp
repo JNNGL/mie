@@ -145,10 +145,8 @@ static void drawLinePixel(Image& image, const Point& start, const Point& end, co
         float distance = segmentDistance({static_cast<float>(x) + 0.5f, static_cast<float>(y) + 0.5f}, start, end);
 
         if (distance < 1.0f) {
-            float t = distance / 1.0f;
-
             Color newColor = color;
-            newColor.a = static_cast<int>(static_cast<float>(color.a) * (1.0f - t));
+            newColor.a = static_cast<int>(static_cast<float>(color.a) * (1.0f - distance));
 
             image.drawPixel(x, y, newColor);
         }

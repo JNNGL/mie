@@ -25,7 +25,7 @@ public:
     void setPixel(int x, int y, Color color);
     void drawPixel(int x, int y, Color color);
 
-    std::shared_ptr<Font> getFont() const;
+    [[nodiscard]] std::shared_ptr<Font> getFont() const;
     void setFont(const std::shared_ptr<Font>& newFont);
     void setTextOptions(const TextOptions& options);
     void changeTextOptions(const std::function<void(TextOptions& options)>& fn);

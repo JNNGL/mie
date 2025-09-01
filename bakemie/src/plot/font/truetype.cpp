@@ -42,16 +42,16 @@ int TrueTypeFont::getTextWidth(const std::string& text, const TextOptions& optio
 
     float scale = stbtt_ScaleForPixelHeight(fontInfo, options.scale * fontSize);
 
-    int width = 0;
+    float width = 0;
     for (size_t i = 0; i < text.length(); i++) {
         int advanceWidth, lsb;
         stbtt_GetCodepointHMetrics(fontInfo, text[i], &advanceWidth, &lsb);
 
         int kern = i == text.length() - 1 ? 0 : stbtt_GetCodepointKernAdvance(fontInfo, text[i], text[i + 1]);
-        width += static_cast<int>(std::round(static_cast<float>(advanceWidth + kern) * scale));
+        width += static_cast<float>(advanceWidth + kern) * scale;
     }
 
-    return width;
+    return static_cast<int>(std::floor(width));
 }
 
 void TrueTypeFont::render(Image& image, const std::string& text, int x, int y, float anchorX, float anchorY, const TextOptions& options) {
@@ -63,31 +63,37 @@ void TrueTypeFont::render(Image& image, const std::string& text, int x, int y, f
     y -= static_cast<int>(std::round(static_cast<float>(descent) * scale + options.scale * fontSize * anchorY));
 
     if (anchorX != 0.0f) {
-        x -= static_cast<int>(std::round(static_cast<float>(getTextWidth(text, options)) * anchorX));
+        x -= static_cast<int>(std::floor(static_cast<float>(getTextWidth(text, options)) * anchorX));
     }
 
+    float xOffset = 0.0f;
     for (size_t i = 0; i < text.length(); i++) {
         int bbX1, bbY1, bbX2, bbY2;
         stbtt_GetCodepointBitmapBox(fontInfo, text[i], scale, scale, &bbX1, &bbY1, &bbX2, &bbY2);
 
-        std::memset(bitmap, 0, std::min((bbX2 - bbX1) * (bbY2 - bbY1), bitmapWidth * bitmapHeight));
-        stbtt_MakeCodepointBitmap(fontInfo, bitmap, bbX2 - bbX1, bbY2 - bbY1, bbX2 - bbX1, scale, scale, text[i]);
-
         int advanceWidth, lsb;
         stbtt_GetCodepointHMetrics(fontInfo, text[i], &advanceWidth, &lsb);
 
-        int targetX = x + static_cast<int>(std::round(static_cast<float>(lsb) * scale));
+        float offset = static_cast<float>(lsb) * scale + xOffset;
+        float shiftX = offset - std::floor(offset);
+
+        bbX2 += static_cast<int>(std::ceil(shiftX));
+
+        std::memset(bitmap, 0, std::min((bbX2 - bbX1) * (bbY2 - bbY1), bitmapWidth * bitmapHeight));
+        stbtt_MakeCodepointBitmapSubpixel(fontInfo, bitmap, bbX2 - bbX1, bbY2 - bbY1, bbX2 - bbX1, scale, scale, shiftX, 0.0f, text[i]);
+
+        int targetX = x + static_cast<int>(std::floor(offset));
         int targetY = y - bbY2;
         for (int fontX = 0; fontX < bbX2 - bbX1; fontX++) {
             for (int fontY = 0; fontY < bbY2 - bbY1; fontY++) {
                 Color newColor = options.textColor;
                 int alpha = bitmap[(bbY2 - bbY1 - 1 - fontY) * (bbX2 - bbX1) + fontX];
-                newColor.a = static_cast<int>(static_cast<float>(newColor.a) *  static_cast<float>(alpha) / 255.0f);
+                newColor.a = static_cast<int>(static_cast<float>(newColor.a) * static_cast<float>(alpha) / 255.0f);
                 image.drawPixel(targetX + fontX, targetY + fontY, newColor);
             }
         }
 
         int kern = i == text.length() - 1 ? 0 : stbtt_GetCodepointKernAdvance(fontInfo, text[i], text[i + 1]);
-        x += static_cast<int>(std::round(static_cast<float>(advanceWidth + kern) * scale));
+        xOffset += static_cast<float>(advanceWidth + kern) * scale;
     }
 }

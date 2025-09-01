@@ -40,8 +40,7 @@ int PSF1Font::getTextWidth(const std::string& text, const TextOptions& options) 
     return text.empty() ? 0 : static_cast<int>(text.length()) * (8 * scale + options.spacing) - options.spacing;
 }
 
-void PSF1Font::render(Image& image, const std::string& text, int x, int y, float anchorX, float anchorY,
-                      const TextOptions& options) {
+void PSF1Font::render(Image& image, const std::string& text, int x, int y, float anchorX, float anchorY, const TextOptions& options) {
     int scale = static_cast<int>(std::round(options.scale));
 
     uint32_t textWidth = getTextWidth(text, options);
