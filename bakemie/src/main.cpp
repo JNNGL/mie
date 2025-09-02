@@ -28,7 +28,25 @@ int main() {
     auto solver = mie::Solver::create();
 
     double wavelength = 500.0e-9;
-    mie::Particle particle{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 1.0e-6};
+
+    mie::ParticleDistribution particle = {
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 1.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 2.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 3.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 4.0e-6}, 1.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 5.0e-6}, 1.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 6.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 7.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 8.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 9.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 10.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 11.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 12.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 13.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 14.0e-6}, 5.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 15.0e-6}, 4.0},
+        {{.etaHost = {1.0, 0.0}, .eta = {1.333, 0.0}, 16.0e-6}, 5.0},
+    };
 
     std::vector<double> x(1000);
     std::vector<double> y(x.size());
@@ -39,7 +57,7 @@ int main() {
         double theta = static_cast<double>(i) / static_cast<double>(x.size() - 1);
         double cosTheta = std::cos(M_PI * theta);
 
-        double value = solver->computeScatteringAmplitudes(particle, cosTheta, wavelength).phase();
+        double value = solver->computePhaseAndCrossSection(particle, cosTheta, wavelength).first;
 
         x[i] = 180.0 * theta;
         y[i] = value;
@@ -63,39 +81,39 @@ int main() {
 
     graph.image.setTextOptions({.textColor = {{0, 0, 0, 200}}, .scale = 1.5});
 
-    {
-        std::stringstream ss;
-        ss << "Host IOR: ";
-        ss << particle.etaHost.real();
-        if (particle.etaHost.imag() != 0.0) {
-            ss << " + " << particle.etaHost.imag() << "i";
-        }
-        graph.image.drawText(ss.str(), 5, 5);
-    }
-
-    {
-        std::stringstream ss;
-        ss << "Particle IOR: ";
-        ss << particle.eta.real();
-        if (particle.eta.imag() != 0.0) {
-            ss << " + " << particle.eta.imag() << "i";
-        }
-        graph.image.drawText(ss.str(), 5, 27);
-    }
-
-    {
-        std::stringstream ss;
-        ss << "Particle radius: ";
-        ss << (particle.radius * 1.0e6) << "um";
-        graph.image.drawText(ss.str(), graph.image.getWidth() / 2, 27, 0.5);
-    }
-
-    {
-        std::stringstream ss;
-        ss << "Wavelength: ";
-        ss << (wavelength * 1.0e9) << "nm";
-        graph.image.drawText(ss.str(), graph.image.getWidth() / 2, 5, 0.5);
-    }
+    // {
+    //     std::stringstream ss;
+    //     ss << "Host IOR: ";
+    //     ss << particle.etaHost.real();
+    //     if (particle.etaHost.imag() != 0.0) {
+    //         ss << " + " << particle.etaHost.imag() << "i";
+    //     }
+    //     graph.image.drawText(ss.str(), 5, 5);
+    // }
+    //
+    // {
+    //     std::stringstream ss;
+    //     ss << "Particle IOR: ";
+    //     ss << particle.eta.real();
+    //     if (particle.eta.imag() != 0.0) {
+    //         ss << " + " << particle.eta.imag() << "i";
+    //     }
+    //     graph.image.drawText(ss.str(), 5, 27);
+    // }
+    //
+    // {
+    //     std::stringstream ss;
+    //     ss << "Particle radius: ";
+    //     ss << (particle.radius * 1.0e6) << "um";
+    //     graph.image.drawText(ss.str(), graph.image.getWidth() / 2, 27, 0.5);
+    // }
+    //
+    // {
+    //     std::stringstream ss;
+    //     ss << "Wavelength: ";
+    //     ss << (wavelength * 1.0e9) << "nm";
+    //     graph.image.drawText(ss.str(), graph.image.getWidth() / 2, 5, 0.5);
+    // }
 
     {
         std::stringstream ss;

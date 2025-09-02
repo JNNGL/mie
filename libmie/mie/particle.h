@@ -1,6 +1,8 @@
 #pragma once
 
 #include <complex>
+#include <vector>
+#include <utility>
 
 namespace mie {
 
@@ -13,5 +15,7 @@ namespace mie {
         [[nodiscard]] int computeNumberOfTerms(const std::complex<double>& x) const;
         [[nodiscard]] int computeNumberOfTerms(double wavelength) const;
     };
+
+    typedef std::vector<std::pair<Particle, double>> ParticleDistribution;
 
 }

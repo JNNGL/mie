@@ -61,7 +61,7 @@ static Ticks populateTicks(double minValue, double maxValue, double step, int mi
 
     double t = 1.0;
     bool flag = ticks[0].size() > maxTicks;
-    while (ticks[0].size() < minTicks || ticks[0].size() > maxTicks) {
+    for (int i = 0; i < 100 && (ticks[0].size() < minTicks || ticks[0].size() > maxTicks); i++) {
         double factor = std::pow(5.0, t);
 
         if (flag) {
@@ -183,6 +183,9 @@ void Graph::calculateGraphPadding(double& minY, double& maxY) const {
     }
 
     double padding = std::sqrt(maxY - minY) * graphPadding;
+    if (maxY == minY) {
+        padding = graphPadding;
+    }
     if (minY >= 0.0) {
         minY = std::max(0.0, minY - padding);
     } else {
