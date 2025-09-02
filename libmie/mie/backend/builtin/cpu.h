@@ -16,6 +16,18 @@ namespace mie {
         [[nodiscard]] const BackendInfo& backendInfo() const override {
             return info;
         }
+
+        [[nodiscard]] std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const Particle& particle, const std::vector<double>& cosTheta, double wavelength) override;
+        [[nodiscard]] std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const Particle& particle, double cosTheta, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const std::vector<Particle>& particle, double cosTheta, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<double> computePhaseFunction(const Particle& particle, std::vector<double>& cosTheta, double wavelength) override;
+        [[nodiscard]] std::vector<double> computePhaseFunction(const Particle& particle, double cosTheta, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<double> computePhaseFunction(const std::vector<Particle>& particle, double cosTheta, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<double> computePhaseFunction(const ParticleDistribution& particle, std::vector<double>& cosTheta, double wavelength) override;
+        [[nodiscard]] std::vector<CrossSection> computeCrossSection(const Particle& particle, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<CrossSection> computeCrossSection(const std::vector<Particle>& particle, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<CrossSection> computeCrossSection(const ParticleDistribution& particle, const std::vector<double>& wavelength) override;
+        [[nodiscard]] std::vector<CrossSection> computeCrossSection(const std::vector<ParticleDistribution>& particle, const std::vector<double>& wavelength) override;
     };
 
 }

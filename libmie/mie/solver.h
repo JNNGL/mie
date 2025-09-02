@@ -35,23 +35,17 @@ namespace mie {
 
         [[nodiscard]] virtual const BackendInfo& backendInfo() const = 0;
 
-        // [[nodiscard]] virtual std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const Particle& particle, const std::vector<double>& cosTheta, double wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const Particle& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const std::vector<Particle>& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computePhaseFunction(const Particle& particle, std::vector<double>& cosTheta, double wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computePhaseFunction(const Particle& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computePhaseFunction(const std::vector<Particle>& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computePhaseFunction(const ParticleDistribution& particle, std::vector<double>& cosTheta, double wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computePhaseFunction(const ParticleDistribution& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computePhaseFunction(const std::vector<ParticleDistribution>& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeExtinctionCrossSection(const Particle& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeExtinctionCrossSection(const std::vector<Particle>& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeExtinctionCrossSection(const ParticleDistribution& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeExtinctionCrossSection(const std::vector<ParticleDistribution>& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeScatteringCrossSection(const Particle& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeScatteringCrossSection(const std::vector<Particle>& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeScatteringCrossSection(const ParticleDistribution& particle, const std::vector<double>& wavelength) = 0;
-        // [[nodiscard]] virtual std::vector<double> computeScatteringCrossSection(const std::vector<ParticleDistribution>& particle, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const Particle& particle, const std::vector<double>& cosTheta, double wavelength) = 0;
+        [[nodiscard]] virtual std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const Particle& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<ScatteringAmplitudes> computeScatteringAmplitudes(const std::vector<Particle>& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<double> computePhaseFunction(const Particle& particle, std::vector<double>& cosTheta, double wavelength) = 0;
+        [[nodiscard]] virtual std::vector<double> computePhaseFunction(const Particle& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<double> computePhaseFunction(const std::vector<Particle>& particle, double cosTheta, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<double> computePhaseFunction(const ParticleDistribution& particle, std::vector<double>& cosTheta, double wavelength) = 0;
+        [[nodiscard]] virtual std::vector<CrossSection> computeCrossSection(const Particle& particle, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<CrossSection> computeCrossSection(const std::vector<Particle>& particle, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<CrossSection> computeCrossSection(const ParticleDistribution& particle, const std::vector<double>& wavelength) = 0;
+        [[nodiscard]] virtual std::vector<CrossSection> computeCrossSection(const std::vector<ParticleDistribution>& particle, const std::vector<double>& wavelength) = 0;
 
         [[nodiscard]] virtual ScatteringAmplitudes computeScatteringAmplitudes(const Particle& particle, double cosTheta, double wavelength);
         [[nodiscard]] virtual std::pair<double, CrossSection> computePhaseAndCrossSection(const ParticleDistribution& particle, double cosTheta, double wavelength);

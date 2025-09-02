@@ -49,19 +49,18 @@ int main() {
     };
 
     std::vector<double> x(1000);
-    std::vector<double> y(x.size());
+    std::vector<double> cosTheta(1000);
 
     auto start = std::chrono::steady_clock::now();
 
     for (int i = 0; i < x.size(); i++) {
         double theta = static_cast<double>(i) / static_cast<double>(x.size() - 1);
-        double cosTheta = std::cos(M_PI * theta);
-
-        double value = solver->computePhaseAndCrossSection(particle, cosTheta, wavelength).first;
 
         x[i] = 180.0 * theta;
-        y[i] = value;
+        cosTheta[i] = std::cos(M_PI * theta);
     }
+
+    std::vector<double> y = solver->computePhaseFunction(particle, cosTheta, wavelength);
 
     auto end = std::chrono::steady_clock::now();
 

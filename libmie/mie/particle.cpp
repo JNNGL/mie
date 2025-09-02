@@ -9,7 +9,7 @@ namespace mie {
         y = std::complex<double>(2.0 * M_PI * radius / wavelength, 0.0) * eta;
     }
 
-    int Particle::computeNumberOfTerms(const std::complex<double>& x) const {
+    int Particle::computeNumberOfTerms(const std::complex<double>& x) {
         return static_cast<int>(std::ceil(std::abs(x) + 4.3 * std::cbrt(std::abs(x)) + 1.0));
     }
 

@@ -236,6 +236,10 @@ void Graph::render(const std::vector<double>& x, const std::vector<double>& y) {
     double maxY = std::numeric_limits<double>::min();
 
     for (size_t i = 0; i < x.size(); i++) {
+        if (y[i] <= 0.0 && logScaleY) {
+            throw std::runtime_error("non-positive values");
+        }
+
         minY = std::min(minY, y[i]);
         maxY = std::max(maxY, y[i]);
     }

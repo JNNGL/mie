@@ -16,7 +16,10 @@ namespace mie {
                         });
 
                         if (taskQueue.empty()) {
-                            return;
+                            if (stop) {
+                                return;
+                            }
+                            continue;
                         }
 
                         task = std::move(taskQueue.front());

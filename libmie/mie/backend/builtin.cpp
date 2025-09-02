@@ -16,7 +16,7 @@ namespace mie {
 
     const std::vector<std::pair<BackendInfo, detail::BackendInstantiator>> g_builtinBackends = {
 #ifdef ENABLE_CUDA_BACKEND
-        DECLARE_BACKEND(CUDABackend),
+        // DECLARE_BACKEND(CUDABackend),
 #endif
         DECLARE_BACKEND(CPUBackend)
     };

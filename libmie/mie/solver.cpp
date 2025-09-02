@@ -35,7 +35,7 @@ namespace mie {
         std::complex<double> psiZeta = 0.5 * (1.0 - std::exp(std::complex<double>(0.0, 2.0) * x));
         std::complex<double> psiOverZeta = 0.5 * (1.0 - std::exp(std::complex<double>(0.0, -2.0) * x));
 
-        const int numTerms = particle.computeNumberOfTerms(x);
+        const int numTerms = Particle::computeNumberOfTerms(x);
         for (int n = 1; n <= numTerms; n++) {
             psiZeta *= (static_cast<double>(n) / x - Ax1) * (static_cast<double>(n) / x - Bn);
             Bn = Ax + std::complex<double>(0.0, 1.0) / psiZeta;

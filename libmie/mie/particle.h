@@ -12,7 +12,7 @@ namespace mie {
         double radius;
 
         void computeSizeParameters(double wavelength, std::complex<double>& x, std::complex<double>& y) const;
-        [[nodiscard]] int computeNumberOfTerms(const std::complex<double>& x) const;
+        [[nodiscard]] static int computeNumberOfTerms(const std::complex<double>& x);
         [[nodiscard]] int computeNumberOfTerms(double wavelength) const;
     };
 
