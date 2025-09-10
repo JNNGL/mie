@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.18)
 
 project(bakemie)
 
@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB_RECURSE BAKEMIE_SOURCES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(bakemie ${BAKEMIE_SOURCES})
 target_include_directories(bakemie PUBLIC ${PROJECT_SOURCE_DIR}/src)
-target_link_libraries(bakemie PUBLIC libmie)
+target_link_libraries(bakemie PUBLIC mie)
 
 configure_file(${PROJECT_SOURCE_DIR}/resources/zap-vga09.psf ${PROJECT_BINARY_DIR}/font.psf COPYONLY)
 configure_file(${PROJECT_SOURCE_DIR}/resources/RobotoMono-Regular.ttf ${PROJECT_BINARY_DIR}/font.ttf COPYONLY)

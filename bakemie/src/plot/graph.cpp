@@ -240,6 +240,14 @@ void Graph::render(const std::vector<double>& x, const std::vector<double>& y) {
             throw std::runtime_error("non-positive values");
         }
 
+        if (std::isnan(y[i])) {
+            throw std::runtime_error("not a number");
+        }
+
+        if (std::isinf(y[i])) {
+            throw std::runtime_error("infinity");
+        }
+
         minY = std::min(minY, y[i]);
         maxY = std::max(maxY, y[i]);
     }

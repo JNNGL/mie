@@ -1,7 +1,7 @@
 #include <mie/backend/registry.h>
 
 #include <mie/backend/builtin/cpu.h>
-#include <mie/backend/builtin/cuda.h>
+#include <mie/backend/builtin/opencl.h>
 
 #include <utility>
 #include <vector>
@@ -15,8 +15,8 @@ namespace mie {
     extern const std::vector<std::pair<BackendInfo, detail::BackendInstantiator>> g_builtinBackends;
 
     const std::vector<std::pair<BackendInfo, detail::BackendInstantiator>> g_builtinBackends = {
-#ifdef ENABLE_CUDA_BACKEND
-        // DECLARE_BACKEND(CUDABackend),
+#ifdef LIBMIE_OPENCL_BACKEND
+        DECLARE_BACKEND(OpenCLBackend),
 #endif
         DECLARE_BACKEND(CPUBackend)
     };
